@@ -1,22 +1,22 @@
 import cv2
 import numpy as np
 
-img_rgb = cv2.imread('Menu.png')
-enchant = cv2.imread('Epic.png')
-w1, h1 = enchant.shape[:-1]
-res1 = cv2.matchTemplate(img_rgb, enchant, cv2.TM_CCOEFF_NORMED)
-
-attack = cv2.imread('Zand_the_Bandit.png')
-w2, h2 = attack.shape[:-1]
-res2 = cv2.matchTemplate(img_rgb, attack, cv2.TM_CCOEFF_NORMED)
-
 threshold = .8
-loc1 = np.where(res1 >= threshold)
-loc2 = np.where(res2 >= threshold)
-for pt in zip(*loc1[::-1]):  # Switch columns and rows
-    cv2.rectangle(img_rgb, pt, (pt[0] + h1, pt[1] + w1), (0, 255, 255), 2)
+yellow = (0, 255, 255)
+green = (0, 255, 0)
 
-for pt in zip(*loc2[::-1]):  # Switch columns and rows
-    cv2.rectangle(img_rgb, pt, (pt[0] + h2, pt[1] + w2), (0, 255, 0), 2)
+menu = cv2.imread('Menu.png')
+enchant = cv2.imread('Epic.png')
+attack = cv2.imread('Zand_the_Bandit.png')
+cards = [[enchant,yellow],[attack,green]]
+card_height, card_width = cards[0][0].shape[:-1]
 
-cv2.imwrite('result.png', img_rgb)
+
+for card in cards:
+    match = cv2.matchTemplate(menu, card[0], cv2.TM_CCOEFF_NORMED)
+    location = np.where(match >= threshold)
+    for point in zip(*location[::-1]):  # Switch columns and rows
+        cv2.rectangle(menu, point, (point[0] + card_width, point[1] + card_height), card[1], 2)
+
+
+cv2.imwrite('result.png', menu)
