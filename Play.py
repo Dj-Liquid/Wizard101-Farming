@@ -19,13 +19,12 @@ w = gw.getWindowsWithTitle("Wizard101")[0]
 
 def Choose_Spell(position):
     #current_position = mouse.get_position()
-    print("One Card",position)
+    #print("One Card",position)
     #print("Mouse",current_position[0])
     #mouse.drag(current_position[0], current_position[1], position[0], position[1], absolute=True, duration=0.2)
     mouse.move(position[0], position[1], absolute=True, duration=0.15)
-    time.sleep(.2)
+    time.sleep(.5)
     mouse.click('left')
-    time.sleep(.2)
 
 def Attack():
     location = 0
@@ -43,8 +42,7 @@ def Attack():
     cv2.imwrite('result2.png', menu)
     if location != 0:
         Choose_Spell(location)
-    else:
-        Attack()
+        
     
 def Enchant(epic_position,zand_position):
     Choose_Spell(epic_position)
@@ -55,8 +53,9 @@ def Play_Round():
     #print("Both cards",positions)
     Enchant(positions[0],positions[1])
     mouse.move(0, 400, absolute=False, duration=0.15)
-    time.sleep(5)
+    time.sleep(3.5)
     Attack()
+    mouse.move(0, 400, absolute=False, duration=0.15)
 
 def Get_Cards():
     w.activate()
@@ -75,10 +74,12 @@ def Get_Cards():
         for point in zip(*location[::-1]):  # Switch columns and rows
             cv2.rectangle(menu, point, (point[0] + card_width, point[1] + card_height), card[1], 2)
             locations.append([point[0] + card_width // 2, point[1] + card_height // 2])
+            if len(locations)>1:
+                if abs(locations[1][0] - locations[0][0]) <= 10:
+                locations.pop(1)
     
     cv2.imwrite('result.png', menu)
-    
-    return locations[:2]
+    return locations
 '''
 def Test():
     global pause_State
@@ -131,15 +132,16 @@ def Record():
 #playing_thread = threading.Thread(target=Get_Cards, args=())
 #recording_thread.start()
 #playing_thread.start()
-Play_Round()
+#Play_Round()
 
-'''
+
 try:
     while True:
-        time.sleep(.1)
+        keyboard.wait('z')
+        Play_Round()
 except KeyboardInterrupt:
     stop_threads = True
     #recording_thread.join()
     #playing_thread.join()
     print("Program terminated")
-'''
+
