@@ -5,6 +5,7 @@ import mouse
 import time
 import threading
 import pygetwindow as gw
+import pyautogui
 
 
 threshold = .8
@@ -29,7 +30,12 @@ def Play_Round():
     #Enchant(positions[0],positions[1])
 
 def Get_Cards():
-    menu = cv2.imread('Menu.png')
+    w = gw.getWindowsWithTitle("Wizard101")[0]
+    # activate the window
+    w.activate()
+    img = pyautogui.screenshot(region=(w.left, w.top, w.width, w.height))
+    menu = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    #menu = cv2.imread('Menu.png')
     enchant = cv2.imread('Epic.png')
     attack = cv2.imread('Zand_the_Bandit.png')
     cards = [[enchant,yellow],[attack,green]]
@@ -44,8 +50,6 @@ def Get_Cards():
             locations.append([point, (point[0] + card_width, point[1] + card_height)])
     
     cv2.imwrite('result.png', menu)
-    cv2.imshow('Result',menu)
-    cv2.waitKey(0)
     
     return locations
 '''
@@ -97,17 +101,18 @@ def Record():
 '''
 
 #recording_thread = threading.Thread(target=Record, args=())
-playing_thread = threading.Thread(target=Get_Cards, args=())
+#playing_thread = threading.Thread(target=Get_Cards, args=())
 #recording_thread.start()
-playing_thread.start()
+#playing_thread.start()
+Play_Round()
 
-
-
+'''
 try:
     while True:
         time.sleep(.1)
 except KeyboardInterrupt:
     stop_threads = True
     #recording_thread.join()
-    playing_thread.join()
+    #playing_thread.join()
     print("Program terminated")
+'''
