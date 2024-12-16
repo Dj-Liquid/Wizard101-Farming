@@ -85,7 +85,7 @@ def Match(card):
         cv2.rectangle(menu, point, (point[0] + card_width, point[1] + card_height), card[1], 2)
         location = [point[0] + card_width // 2, point[1] + card_height // 2]
         
-    #cv2.imwrite('Most_recent_Image.png', menu)
+    cv2.imwrite('Most_recent_Image.png', menu)
     return location
     
     
