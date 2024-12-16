@@ -7,7 +7,7 @@ import threading
 import pygetwindow as gw
 import pyautogui
 
-
+fights = 0
 threshold = .8
 yellow = (0, 255, 255)
 green = (0, 255, 0)
@@ -44,12 +44,14 @@ def Attack():
     if location != 0:
         Choose_Spell(location)
     '''
+    global fights
     while True:
         location = Match(cards[-1])
         if location != '':
             break
         time.sleep(3)
     Choose_Spell(location)
+    fights+=1
         
     
 def Enchant(epic_position,zand_position):
@@ -184,5 +186,6 @@ except KeyboardInterrupt:
     stop_threads = True
     #recording_thread.join()
     #playing_thread.join()
+    print("#of fights completed: ",fights)
     print("Program terminated")
 
