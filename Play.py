@@ -62,6 +62,9 @@ def Play_Round():
         if len(positions)>1:
             break
         else:
+            keyboard.press('w')
+            time.sleep(.1)
+            keyboard.release('w')
             time.sleep(5)
         print("Checking")
     #print("Both cards",positions)
