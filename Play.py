@@ -11,37 +11,45 @@ import pyautogui
 threshold = .8
 yellow = (0, 255, 255)
 green = (0, 255, 0)
+white = (255, 255, 255)
 pause_State = True
 stop_threads = False
 w = gw.getWindowsWithTitle("Wizard101")[0]
+enchant = cv2.imread('Epic.png')
+attack = cv2.imread('Zand_the_Bandit.png')
+enchanted_attack = cv2.imread('Epic_Zand.png')
+cards = [[enchant,yellow],[attack,green],[enchanted_attack,white]] 
+card_height, card_width = cards[0][0].shape[:-1]
 #WizardGraphicalClient
 #Wizard101
 
 def Choose_Spell(position):
-    #current_position = mouse.get_position()
-    #print("One Card",position)
-    #print("Mouse",current_position[0])
-    #mouse.drag(current_position[0], current_position[1], position[0], position[1], absolute=True, duration=0.2)
     mouse.move(position[0], position[1], absolute=True, duration=0.15)
     time.sleep(.5)
     mouse.click('left')
 
 def Attack():
+    '''
     location = 0
-    attack = cv2.imread('Epic_Zand.png')
     w.activate()
     img = pyautogui.screenshot(region=(w.left, w.top, w.width, w.height))
-    width, height = attack.shape[:-1]
     menu = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     #menu = cv2.imread('Test.png')
-    match = cv2.matchTemplate(menu, attack, cv2.TM_CCOEFF_NORMED)
+    match = cv2.matchTemplate(menu, enchanted_attack, cv2.TM_CCOEFF_NORMED)
     loc = np.where(match >= threshold)
     for point in zip(*loc[::-1]):  # Switch columns and rows
-        cv2.rectangle(menu, point, (point[0] + height, point[1] + width), (255, 255, 255), 2)
-        location = [point[0] + width // 2, point[1] + height // 2]
+        cv2.rectangle(menu, point, (point[0] + card_height, point[1] + card_width), (255, 255, 255), 2)
+        location = [point[0] + card_width // 2, point[1] + card_height // 2]
     cv2.imwrite('result2.png', menu)
     if location != 0:
         Choose_Spell(location)
+    '''
+    while True:
+        location = Match(cards[-1])
+        if location != '':
+            break
+        time.sleep(3)
+    Choose_Spell(location)
         
     
 def Enchant(epic_position,zand_position):
@@ -49,23 +57,60 @@ def Enchant(epic_position,zand_position):
     Choose_Spell(zand_position)
 
 def Play_Round():
-    positions = Get_Cards()
+    while True:
+        positions = Get_Cards()
+        if len(positions)>1:
+            break
+        else:
+            time.sleep(5)
+        print("Checking")
     #print("Both cards",positions)
     Enchant(positions[0],positions[1])
     mouse.move(0, 400, absolute=False, duration=0.15)
-    time.sleep(3.5)
+    time.sleep(2.5)
     Attack()
     mouse.move(0, 400, absolute=False, duration=0.15)
+    for x in range(30):
+        time.sleep(1)
+        print(x)
+
+def Match(card):
+    location = ''
+    w.activate()
+    img = pyautogui.screenshot(region=(w.left, w.top, w.width, w.height))
+    menu = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+    match = cv2.matchTemplate(menu, card[0], cv2.TM_CCOEFF_NORMED)
+    loc = np.where(match >= threshold)
+    for point in zip(*loc[::-1]):  # Switch columns and rows
+        cv2.rectangle(menu, point, (point[0] + card_width, point[1] + card_height), card[1], 2)
+        location = [point[0] + card_width // 2, point[1] + card_height // 2]
+        
+    #cv2.imwrite('Most_recent_Image.png', menu)
+    return location
+    
+    
 
 def Get_Cards():
+    locations = []
+    locations_upd = []
+    for card in cards[:-1]:
+        locations.append(Match(card))
+        if locations[0] == '':
+            return []
+    for location in locations:
+        if len(locations_upd)==0:
+            locations_upd.append(location)
+        else:
+            if abs(locations_upd[0][0] - location[0]) >= 10:
+                locations_upd.append(location)
+    print("Success",locations_upd)  
+    return locations_upd
+    
+    '''
     w.activate()
     img = pyautogui.screenshot(region=(w.left, w.top, w.width, w.height))
     menu = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
     #menu = cv2.imread('Menu.png')
-    enchant = cv2.imread('Epic.png')
-    attack = cv2.imread('Zand_the_Bandit.png')
-    cards = [[enchant,yellow],[attack,green]]
-    card_height, card_width = cards[0][0].shape[:-1]
     locations = []
     
     for card in cards:
@@ -75,21 +120,13 @@ def Get_Cards():
             cv2.rectangle(menu, point, (point[0] + card_width, point[1] + card_height), card[1], 2)
             locations.append([point[0] + card_width // 2, point[1] + card_height // 2])
             if len(locations)>1:
-                if abs(locations[1][0] - locations[0][0]) <= 10:
-                locations.pop(1)
+                if abs(locations[-1][0] - locations[-2][0]) <= 10:
+                    locations.pop(-1)
     
     cv2.imwrite('result.png', menu)
+    print(locations)
     return locations
-'''
-def Test():
-    global pause_State
-    while True:
-        time.sleep(.1)
-        if not pause_State:
-            print(mouse.get_position())
-        if keyboard.is_pressed('z'):
-            pause_State*=-1
-'''
+    '''
 '''
 def Record():
     global stop_threads
@@ -133,11 +170,12 @@ def Record():
 #recording_thread.start()
 #playing_thread.start()
 #Play_Round()
-
-
+  
+    
+print("Press z to start")
+keyboard.wait('z')
 try:
     while True:
-        keyboard.wait('z')
         Play_Round()
 except KeyboardInterrupt:
     stop_threads = True
